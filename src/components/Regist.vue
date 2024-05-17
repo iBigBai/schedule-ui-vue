@@ -1,5 +1,9 @@
 <script setup>
 import {ref, reactive} from "vue";
+import {useRouter} from "vue-router";
+import request from "../utils/request.js";
+
+let router = useRouter();
 
 let registUser = reactive({
   username: '',
@@ -10,10 +14,16 @@ let usernameMsg = ref('')
 let userPwdMsg = ref('')
 let reUserPwdMsg = ref('')
 
-function checkUsername() {
+async function checkUsername() {
   let usernameReg = /^[a-zA-Z0-9]{5,10}$/;
   if (!usernameReg.test(registUser.username)) {
     usernameMsg.value = '用户名格式不正确'
+    return false
+  }
+  //发送异步请求 校验用户名是否被占用
+  let {data} = await request.post(`user/checkUsernameUsed?username=${registUser.username}`);
+  if(data.code != 200){
+    usernameMsg.value="用户名占用"
     return false
   }
   usernameMsg.value = 'OK';
@@ -43,6 +53,21 @@ function checkReUserPwd() {
   }
   reUserPwdMsg.value = "OK"
   return true
+}
+
+async function regist() {
+  if (checkUsername() && checkUserPwd() && checkReUserPwd()) {
+    let {data} = await request.post('user/regist', registUser);
+    console.log(data);
+    if (data.code == 200) {
+      alert('注册成功');
+      router.push('/login')
+    } else {
+      alert("抱歉,用户名被抢注了")
+    }
+  } else {
+    alert("校验不通过,请求再次检查数据")
+  }
 }
 
 </script>
@@ -90,7 +115,7 @@ function checkReUserPwd() {
       </tr>
       <tr class="ltr">
         <td colspan="2" class="buttonContainer">
-          <input class="btn1" type="button" value="注册">
+          <input class="btn1" type="button" @click="regist()" value="注册">
           <input class="btn1" type="button" value="重置">
           <router-link to="/login">
             <button class="btn1">去登录</button>
