@@ -1,5 +1,9 @@
 <script setup>
 import {ref, reactive} from "vue";
+import {useRouter} from "vue-router";
+
+let router = useRouter();
+import request from "../utils/request.js";
 // 响应式数据,保存用户输入的表单信息
 let loginUser = reactive({username: '', userPwd: ''})
 // 响应式数据,保存校验的提示信息
@@ -20,14 +24,31 @@ function checkUsername() {
 // 校验密码的方法格式
 function checkUserPwd() {
   var userPwdReg = /^[0-9]{6}$/;
-    // 校验密码
-    if (!userPwdReg.test(loginUser.userPwd)) {
-      // 格式不合法
-      userPwdMsg.value = "格式有误"
-      return false
+  // 校验密码
+  if (!userPwdReg.test(loginUser.userPwd)) {
+    // 格式不合法
+    userPwdMsg.value = "格式有误"
+    return false
+  }
+  userPwdMsg.value = "ok"
+  return true
+}
+
+async function login() {
+  if (checkUsername() && checkUserPwd()) {
+    let {data} = await request.post('user/login', loginUser);
+    if (data.code == 200) {
+      alert("登录成功")
+      // 跳转到showSchedule
+      router.push("/showSchedule")
+    } else if (data.code == 503) {
+      alert("密码有误")
+    } else if (data.code == 501) {
+      alert("用户名有误")
+    } else {
+      alert("未知错误")
     }
-    userPwdMsg.value = "ok"
-    return true
+  }
 }
 
 </script>
@@ -58,7 +79,7 @@ function checkUserPwd() {
       </tr>
       <tr class="ltr">
         <td colspan="2" class="buttonContainer">
-          <input class="btn1" type="button" value="登录">
+          <input class="btn1" type="button" @click="login()" value="登录">
           <input class="btn1" type="button" value="重置">
           <router-link to="/regist">
             <button class="btn1">去注册</button>
