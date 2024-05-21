@@ -43,7 +43,6 @@ async function login() {
     if (data.code == 200) {
       alert("登录成功")
       //更新pinia数据
-      console.log(data)
       user.uid = data.data.uid;
       user.username = data.data.username;
       // 跳转到showSchedule
