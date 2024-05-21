@@ -1,6 +1,9 @@
 <script setup>
 import {ref, reactive} from "vue";
 import {useRouter} from "vue-router";
+import {userStore} from "../store/userStore.js";
+
+let user = userStore();
 
 let router = useRouter();
 import request from "../utils/request.js";
@@ -39,6 +42,10 @@ async function login() {
     let {data} = await request.post('user/login', loginUser);
     if (data.code == 200) {
       alert("登录成功")
+      //更新pinia数据
+      console.log(data)
+      user.uid = data.data.uid;
+      user.username = data.data.username;
       // 跳转到showSchedule
       router.push("/showSchedule")
     } else if (data.code == 503) {
@@ -49,6 +56,14 @@ async function login() {
       alert("未知错误")
     }
   }
+}
+
+// 清除表单信息的方法
+function clearForm() {
+  loginUser.username = ''
+  loginUser.userPwd = ''
+  usernameMsg.value = ''
+  userPwdMsg.value = ''
 }
 
 </script>
@@ -80,7 +95,7 @@ async function login() {
       <tr class="ltr">
         <td colspan="2" class="buttonContainer">
           <input class="btn1" type="button" @click="login()" value="登录">
-          <input class="btn1" type="button" value="重置">
+          <input class="btn1" type="button" @click="clearForm()" value="重置">
           <router-link to="/regist">
             <button class="btn1">去注册</button>
           </router-link>

@@ -1,5 +1,15 @@
 <script setup>
-
+import {userStore} from "../store/userStore.js";
+import {scheduleStore} from "../store/scheduleStore.js";
+import {useRouter} from "vue-router";
+let user = userStore();
+let schedule = scheduleStore();
+let router = useRouter();
+let logout = () => {
+  user.$reset();
+  schedule.$reset();
+  router.push("/login");
+}
 </script>
 
 <template>
@@ -17,8 +27,8 @@
 
 
       <div   class="optionDiv">
-        欢迎xxx
-        <button class="b1b">退出登录</button>
+        欢迎{{user.username}}
+        <button class="b1b" @click="logout()">退出登录</button>
         <router-link to="/showSchedule">
           <button class="b1b">查看我的日程</button>
         </router-link>
@@ -51,7 +61,7 @@
   background-color: antiquewhite;
 }
 .optionDiv{
-  width: 300px;
+  width: 400px;
   float: right;
 }
 </style>
